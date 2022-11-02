@@ -1,0 +1,9 @@
+<library path="remote_motion_hardware_interface">
+  <class name="remote_motion_hardware/ActuatorInterface"
+         type="remote_motion_hardware::ActuatorInterface"
+         base_class_type="hardware_interface::ActuatorInterface">
+    <description>
+      Hardware interface for remote or heavy hardware control nodes.
+    </description>
+  </class>
+</library>
