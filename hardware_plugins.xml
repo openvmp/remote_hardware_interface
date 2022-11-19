@@ -1,0 +1,10 @@
+<library path="remote_hardware_interface">
+  <class
+    name="remote_hardware_interface/RemoteActuatorInterface"
+    type="remote_hardware_interface::RemoteActuatorInterface"
+    base_class_type="hardware_interface::ActuatorInterface">
+    <description>
+      remote_hardware_interface/RemoteActuatorInterface
+    </description>
+  </class>
+</library>

@@ -15,6 +15,8 @@ namespace remote_hardware_interface {
 
 hardware_interface::CallbackReturn RemoteActuatorInterface::on_init(
     const hardware_interface::HardwareInfo& actuator_info) {
+  fprintf(stderr, "RemoteActuatorInterface: start\n");
+
   if (ActuatorInterface::on_init(actuator_info) != CallbackReturn::SUCCESS) {
     return CallbackReturn::ERROR;
   }

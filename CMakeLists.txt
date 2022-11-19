@@ -36,7 +36,7 @@ set(project_DEPENDENCIES
 )
 
 # Library target
-add_library(${PROJECT_NAME} ${project_SOURCE_FILES})
+add_library(${PROJECT_NAME} SHARED ${project_SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} ${project_LIBRARIES})
 ament_target_dependencies(${PROJECT_NAME} ${project_DEPENDENCIES})
 ament_export_targets(${PROJECT_NAME}_library HAS_LIBRARY_TARGET)
@@ -63,5 +63,7 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+pluginlib_export_plugin_description_file(hardware_interface hardware_plugins.xml)
 
 ament_package()

@@ -25,7 +25,8 @@
 
 namespace remote_hardware_interface {
 
-class RemoteActuatorInterface : public hardware_interface::ActuatorInterface {
+class RemoteActuatorInterface final
+    : public hardware_interface::ActuatorInterface {
  public:
   // RCLCPP_SHARED_PTR_DEFINITIONS(RemoteActuatorInterface);
 
