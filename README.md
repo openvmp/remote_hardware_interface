@@ -70,7 +70,7 @@ flowchart TB
     end
     
     subgraph stepper_driver_node[Example stepper driver node]
-      stepper_driver_impl[//stepper_driver/motor1/] -->
+      stepper_driver_impl[//stepper/motor1/] -->
       stepper_logic[Stepper driver's driver] -->
       stepper_driver_topic[//modbus/line1/02/]
     end
