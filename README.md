@@ -5,7 +5,7 @@
 This package is a part of [the OpenVMP project](https://github.com/openvmp/openvmp).
 But it's designed to be universal and usable independently from the rest of OpenVMP or in a combination with select OpenVMP packages.
 
-## remote\_motion\_hardware
+## remote\_hardware\_interface
 
 This package implements a hardware interface plugin for ros2\_control
 and proxies requests to compatible nodes that actually implement the hardware
@@ -33,7 +33,7 @@ Add the following to the URDF files:
 
 ```
   <hardware>
-    <plugin>remote_motion_hardware/ActuatorInterface</plugin>
+    <plugin>remote_hardware_interface/SystemInterface</plugin>
     <param name="prefix">/robot1</param>
   </hardware>
 ```

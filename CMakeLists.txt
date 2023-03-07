@@ -15,24 +15,34 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(remote_actuator REQUIRED)
+find_package(remote_encoder REQUIRED)
 
 # Logic shared by all targets
 include_directories(
   include
+  ${remote_actuator_INCLUDE_DIRS}
+  ${remote_encoder_INCLUDE_DIRS}
 )
 
 set(project_SOURCE_FILES
-  src/actuator_interface.cpp
+  src/system_interface.cpp
+  src/client_actuator.cpp
+  src/client_encoder.cpp
 )
 
 set(project_LIBRARIES
   ${rclcpp_LIBRARIES}
+  ${remote_actuator_LIBRARIES}
+  ${remote_encoder_LIBRARIES}
 )
 
 set(project_DEPENDENCIES
   rclcpp
   hardware_interface
   pluginlib
+  remote_actuator
+  remote_encoder
 )
 
 # Library target

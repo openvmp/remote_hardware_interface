@@ -3,13 +3,16 @@
 <package format="3">
   <name>remote_hardware_interface</name>
   <version>0.0.1</version>
-  <description>ros2_control hardware interface plugin that forwards requests to compatible nodes that actually implement the hardware control</description>
+  <description>ros2_control hardware interface plugin that forwards requests to compatible nodes
+    that actually implement the hardware control</description>
   <maintainer email="openvmp@proton.me">Roman Kuzmenko</maintainer>
   <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
   <depend>hardware_interface</depend>
+  <depend>remote_actuator</depend>
+  <depend>remote_encoder</depend>
   <depend>pluginlib</depend>
 
   <test_depend>ament_lint_auto</test_depend>
