@@ -31,10 +31,10 @@ namespace remote_hardware_interface {
 
 class RemoteSystemInterface final : public hardware_interface::SystemInterface {
  public:
-  RCLCPP_SHARED_PTR_DEFINITIONS(RemoteSystemInterface);
+  RCLCPP_SHARED_PTR_DEFINITIONS(RemoteSystemInterface)
 
   hardware_interface::CallbackReturn on_init(
-      const hardware_interface::HardwareInfo& info) override;
+      const hardware_interface::HardwareInfo &info) override;
 
   std::vector<hardware_interface::StateInterface> export_state_interfaces()
       override;
@@ -48,11 +48,11 @@ class RemoteSystemInterface final : public hardware_interface::SystemInterface {
   // hardware_interface::CallbackReturn on_deactivate(
   //     const rclcpp_lifecycle::State& previous_state) override;
 
-  hardware_interface::return_type read(const rclcpp::Time& time,
-                                       const rclcpp::Duration& period) override;
+  hardware_interface::return_type read(const rclcpp::Time &time,
+                                       const rclcpp::Duration &period) override;
 
   hardware_interface::return_type write(
-      const rclcpp::Time& time, const rclcpp::Duration& period) override;
+      const rclcpp::Time &time, const rclcpp::Duration &period) override;
 
  private:
   rclcpp::Node::SharedPtr node_;
@@ -69,10 +69,8 @@ class RemoteSystemInterface final : public hardware_interface::SystemInterface {
 
   std::vector<std::shared_ptr<ActuatorClient>> client_actuators_;
   std::vector<std::shared_ptr<EncoderClient>> client_encoders_;
-  std::map<const std::string, std::shared_ptr<remote_actuator::Interface>>
-      actuators_;
-  std::map<const std::string, std::shared_ptr<remote_encoder::Interface>>
-      encoders_;
+  std::map<std::string, std::shared_ptr<remote_actuator::Interface>> actuators_;
+  std::map<std::string, std::shared_ptr<remote_encoder::Interface>> encoders_;
 };
 
 }  // namespace remote_hardware_interface

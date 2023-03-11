@@ -22,12 +22,7 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
   executor_ = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
   node_ = std::make_shared<rclcpp::Node>(
       "remote_hardware_interface",
-      rclcpp::NodeOptions().arguments({
-          "--ros-args",
-          "-r",
-          "__ns",
-          hardware_info.hardware_parameters.at("namespace"),
-      }));
+      hardware_info.hardware_parameters.at("namespace"));
   executor_->add_node(node_);
   auto spin = [this]() {
     while (rclcpp::ok()) {
@@ -54,14 +49,9 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
   for (const auto& joint : info_.joints) {
     fprintf(stderr, "RemoteSystemInterface: joint %s\n", joint.name.c_str());
 
-    for (const auto& state_interface : joint.state_interfaces) {
-      fprintf(stderr, "RemoteSystemInterface: state_interface %s (%s)\n",
-              state_interface.name.c_str(), state_interface.data_type.c_str());
-    }
-
     if (joint.command_interfaces.size() > 0) {
-      auto actuator_client = remote_actuator::Factory::New(
-          node_.get(), joint.parameters.at("prefix"));
+      auto actuator_client =
+          remote_actuator::Factory::New(node_.get(), "/actuator/" + joint.name);
 
       for (const auto& command_interface : joint.command_interfaces) {
         fprintf(stderr, "RemoteSystemInterface: command_interface %s (%s)\n",
@@ -70,21 +60,29 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
 
         if (command_interface.name == hardware_interface::HW_IF_POSITION) {
           if (actuator_client->has_position()) {
-            actuators_.insert({joint.name + "/position", actuator_client});
+            fprintf(stderr,
+                    "RemoteSystemInterface: command_interface: has position\n");
+            actuators_.insert(
+                {joint.name + "/" + hardware_interface::HW_IF_POSITION,
+                 actuator_client});
           } else {
             fprintf(stderr,
                     "The model requires a position command interface at %s but "
-                    "the driver does not provide it",
+                    "the driver does not provide it\n",
                     joint.name.c_str());
           }
         } else if (command_interface.name ==
                    hardware_interface::HW_IF_VELOCITY) {
           if (actuator_client->has_velocity()) {
-            actuators_.insert({joint.name + "/velocity", actuator_client});
+            fprintf(stderr,
+                    "RemoteSystemInterface: command_interface: has velocity\n");
+            actuators_.insert(
+                {joint.name + "/" + hardware_interface::HW_IF_VELOCITY,
+                 actuator_client});
           } else {
             fprintf(stderr,
                     "The model requires a velocity command interface at %s but "
-                    "the driver does not provide it",
+                    "the driver does not provide it\n",
                     joint.name.c_str());
           }
         }
@@ -92,8 +90,8 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
     }
 
     if (joint.state_interfaces.size() > 0) {
-      auto encoder_client = remote_encoder::Factory::New(
-          node_.get(), joint.parameters.at("prefix"));
+      auto encoder_client =
+          remote_encoder::Factory::New(node_.get(), "/encoder/" + joint.name);
 
       for (const auto& state_interface : joint.state_interfaces) {
         fprintf(stderr, "RemoteSystemInterface: state_interface %s (%s)\n",
@@ -102,20 +100,28 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
 
         if (state_interface.name == hardware_interface::HW_IF_POSITION) {
           if (encoder_client->has_position()) {
-            encoders_.insert({joint.name + "/position", encoder_client});
+            fprintf(stderr,
+                    "RemoteSystemInterface: state_interface: has position\n");
+            encoders_.insert(
+                {joint.name + "/" + hardware_interface::HW_IF_POSITION,
+                 encoder_client});
           } else {
             fprintf(stderr,
                     "The model requires a position state interface at %s but "
-                    "the driver does not provide it",
+                    "the driver does not provide it\n",
                     joint.name.c_str());
           }
         } else if (state_interface.name == hardware_interface::HW_IF_VELOCITY) {
           if (encoder_client->has_velocity()) {
-            encoders_.insert({joint.name + "/velocity", encoder_client});
+            fprintf(stderr,
+                    "RemoteSystemInterface: state_interface: has velocity\n");
+            encoders_.insert(
+                {joint.name + "/" + hardware_interface::HW_IF_VELOCITY,
+                 encoder_client});
           } else {
             fprintf(stderr,
                     "The model requires a velocity state interface at %s but "
-                    "the driver does not provide it",
+                    "the driver does not provide it\n",
                     joint.name.c_str());
           }
         }
@@ -154,7 +160,6 @@ RemoteSystemInterface::export_state_interfaces() {
   std::vector<hardware_interface::StateInterface> state_interfaces;
 
   for (const auto& joint : info_.joints) {
-    const auto& joint_name = joint.name;
     for (const auto& state_interface : joint.state_interfaces) {
       auto clnt_it = encoders_.find(joint.name + "/" + state_interface.name);
       if (clnt_it != encoders_.end()) {
@@ -163,7 +168,7 @@ RemoteSystemInterface::export_state_interfaces() {
         client_encoders_.push_back(clnt);
 
         state_interfaces.emplace_back(hardware_interface::StateInterface(
-            joint_name, state_interface.name, &clnt->state));
+            joint.name, state_interface.name, &clnt->state));
       }
     }
   }
@@ -176,7 +181,6 @@ RemoteSystemInterface::export_command_interfaces() {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
 
   for (const auto& joint : info_.joints) {
-    const auto& joint_name = joint.name;
     for (const auto& command_interface : joint.command_interfaces) {
       auto clnt_it = actuators_.find(joint.name + "/" + command_interface.name);
       if (clnt_it != actuators_.end()) {
@@ -186,7 +190,7 @@ RemoteSystemInterface::export_command_interfaces() {
         client_actuators_.push_back(clnt);
 
         command_interfaces.emplace_back(hardware_interface::CommandInterface(
-            joint_name, command_interface.name, &clnt->command));
+            joint.name, command_interface.name, &clnt->command));
       }
     }
   }
@@ -196,6 +200,10 @@ RemoteSystemInterface::export_command_interfaces() {
 
 hardware_interface::return_type RemoteSystemInterface::read(
     const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/) {
+  for (const auto& encoder : client_encoders_) {
+    encoder->read();
+  }
+
   return hardware_interface::return_type::OK;
 }
 
