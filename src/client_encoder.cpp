@@ -18,7 +18,7 @@ namespace remote_hardware_interface {
 
 EncoderClient::EncoderClient(std::shared_ptr<remote_encoder::Interface> prov,
                              const std::string &name)
-    : prov_{prov} {
+    : state{0.0}, prov_{prov} {
   if (name == hardware_interface::HW_IF_POSITION) {
     read_func_ =
         std::bind(&remote_encoder::Interface::position_get, prov_.get());
