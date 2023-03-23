@@ -18,7 +18,7 @@ namespace remote_hardware_interface {
 
 ActuatorClient::ActuatorClient(std::shared_ptr<remote_actuator::Interface> prov,
                                const std::string &name)
-    : prov_{prov} {
+    : command{0.0}, prov_{prov} {
   if (name == hardware_interface::HW_IF_POSITION) {
     write_func_ = std::bind(&remote_actuator::Interface::position_set,
                             prov_.get(), std::placeholders::_1);
