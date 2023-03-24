@@ -18,11 +18,10 @@ troubleshooting/introspection, audit log recording,
 or other non-motion-control related operations).
 Examples of such hardware modules include:
 
-- Stepper motor drivers that have ROS2 packages based on the
-  [stepper\_driver](https://github.com/openvmp/stepper_driver/) interface:
-  - [stepper\_driver\_em2rs](https://github.com/openvmp/stepper_driver_em2rs/)
-- Electromagnetic brakes controlled by relay boards compatible with:
-  - [R413D08](https://github.com/openvmp/switch_r413d08/)
+- Stepper motor drivers:
+  - [Leadshine/STEPPERONLINE Modbus](https://github.com/openvmp/stepper_driver_em2rs/)
+- Absolute encoder drivers:
+  - [CUI Devices AMT21](https://github.com/openvmp/encoder_amt21/)
 
 
 ### How to
@@ -32,20 +31,18 @@ Examples of such hardware modules include:
 Add the following to the URDF files:
 
 ```
-  <hardware>
-    <plugin>remote_hardware_interface/SystemInterface</plugin>
-    <param name="prefix">/robot1</param>
-  </hardware>
+  <ros2_control name="HardwareSystem" type="system">
+    <hardware>
+      <plugin>remote_hardware_interface/RemoteSystemInterface</plugin>
+      <param name="namespace">/robot1</param>
+    </hardware>
+  </ros2_control>
 ```
 
-- prefix: the prefix to ROS2 interfaces
+- namespace: the prefix to ROS2 interfaces
 
-  E.g. if the prefix is "/robot1" then the actuator of the join "front" will
-  be accessed at "/robot1/front".
-
-#### Known limitations
-
-- Only the actuator interface is supported for now
+  E.g. if the prefix is "/robot1" then the actuator of the "joint1" joint will
+  be exposed at "/robot1/actuator/joint1".
 
 ### Implementation details
 
@@ -70,19 +67,19 @@ flowchart TB
     end
     
     subgraph stepper_driver_node[Example stepper driver node]
-      stepper_driver_impl[//stepper/motor1/] -->
+      stepper_driver_impl[//actuator/joint1/] -->
       stepper_logic[Stepper driver's driver] -->
       stepper_driver_topic[//modbus/line1/02/]
     end
     
     subgraph absolute_encoder_node[Example stepper driver node]
-      absolute_encoder_impl[//encoder/angle1/] -->
+      absolute_encoder_impl[//encoder/joint1/] -->
       absolute_encoder_logic[Absolute encoder driver] -->
       absolute_encoder_topic[//modbus/line1/01/]
     end
     
     subgraph switch_node[Example switch node]
-      switch_impl[//switch/brake1/] -->
+      switch_impl[//brake/joint1/] -->
       switch_driver[Switch driver] -->
       gpio_intf[GPIO driver]
     end
@@ -99,7 +96,7 @@ flowchart TB
     stepper_driver_topic --> modbus
     brake_intf --> switch_impl
 
-    pmu[Example alternative consumer\nof hardware interfaces:\nPower Management Unit]
+    pmu[Power management driver,\nas an example of alternative consumer\nof hardware interfaces]
     pmu -->stepper_driver_impl
     pmu -->switch_impl
 
