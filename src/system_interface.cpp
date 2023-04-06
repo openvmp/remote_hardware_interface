@@ -24,10 +24,6 @@ namespace remote_hardware_interface {
 
 hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
     const hardware_interface::HardwareInfo& hardware_info) {
-#ifdef DEBUG
-  auto logger = rclcpp::get_logger("remote_hardware_interface");
-#endif
-
   executor_ = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
   node_ = std::make_shared<rclcpp::Node>(
       "remote_hardware_interface",
@@ -40,26 +36,26 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
   };
   thread_executor_spin_ = std::thread(spin);
 
-  RCLCPP_DEBUG(logger, "RemoteSystemInterface: start\n");
+  RCLCPP_DEBUG(node_->get_logger(), "RemoteSystemInterface: start\n");
 
   if (SystemInterface::on_init(hardware_info) != CallbackReturn::SUCCESS) {
     return CallbackReturn::ERROR;
   }
 
-  RCLCPP_DEBUG(logger, "RemoteSystemInterface: %lu parameters\n",
+  RCLCPP_DEBUG(node_->get_logger(), "RemoteSystemInterface: %lu parameters\n",
                info_.hardware_parameters.size());
 #ifdef DEBUG
   for (const auto& hardware_parameter : info_.hardware_parameters) {
-    RCLCPP_DEBUG(logger, "RemoteSystemInterface: %s = %s\n",
+    RCLCPP_DEBUG(node_->get_logger(), "RemoteSystemInterface: %s = %s\n",
                  hardware_parameter.first.c_str(),
                  hardware_parameter.second.c_str());
   }
 #endif
 
-  RCLCPP_DEBUG(logger, "RemoteSystemInterface: %lu joints\n",
+  RCLCPP_DEBUG(node_->get_logger(), "RemoteSystemInterface: %lu joints\n",
                info_.joints.size());
   for (const auto& joint : info_.joints) {
-    RCLCPP_DEBUG(logger, "RemoteSystemInterface: joint %s\n",
+    RCLCPP_DEBUG(node_->get_logger(), "RemoteSystemInterface: joint %s\n",
                  joint.name.c_str());
 
     if (joint.command_interfaces.size() > 0) {
@@ -67,7 +63,7 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
           remote_actuator::Factory::New(node_.get(), "/actuator/" + joint.name);
 
       for (const auto& command_interface : joint.command_interfaces) {
-        RCLCPP_DEBUG(logger,
+        RCLCPP_DEBUG(node_->get_logger(),
                      "RemoteSystemInterface: command_interface %s (%s)\n",
                      command_interface.name.c_str(),
                      command_interface.data_type.c_str());
@@ -75,14 +71,14 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
         if (command_interface.name == hardware_interface::HW_IF_POSITION) {
           if (actuator_client->has_position()) {
             RCLCPP_DEBUG(
-                logger,
+                node_->get_logger(),
                 "RemoteSystemInterface: command_interface: has position\n");
             actuators_.insert(
                 {joint.name + "/" + hardware_interface::HW_IF_POSITION,
                  actuator_client});
           } else {
             RCLCPP_DEBUG(
-                logger,
+                node_->get_logger(),
                 "The model requires a position command interface at %s but "
                 "the driver does not provide it\n",
                 joint.name.c_str());
@@ -91,14 +87,14 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
                    hardware_interface::HW_IF_VELOCITY) {
           if (actuator_client->has_velocity()) {
             RCLCPP_DEBUG(
-                logger,
+                node_->get_logger(),
                 "RemoteSystemInterface: command_interface: has velocity\n");
             actuators_.insert(
                 {joint.name + "/" + hardware_interface::HW_IF_VELOCITY,
                  actuator_client});
           } else {
             RCLCPP_DEBUG(
-                logger,
+                node_->get_logger(),
                 "The model requires a velocity command interface at %s but "
                 "the driver does not provide it\n",
                 joint.name.c_str());
@@ -112,21 +108,22 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
           remote_encoder::Factory::New(node_.get(), "/encoder/" + joint.name);
 
       for (const auto& state_interface : joint.state_interfaces) {
-        RCLCPP_DEBUG(logger, "RemoteSystemInterface: state_interface %s (%s)\n",
+        RCLCPP_DEBUG(node_->get_logger(),
+                     "RemoteSystemInterface: state_interface %s (%s)\n",
                      state_interface.name.c_str(),
                      state_interface.data_type.c_str());
 
         if (state_interface.name == hardware_interface::HW_IF_POSITION) {
           if (encoder_client->has_position()) {
             RCLCPP_DEBUG(
-                logger,
+                node_->get_logger(),
                 "RemoteSystemInterface: state_interface: has position\n");
             encoders_.insert(
                 {joint.name + "/" + hardware_interface::HW_IF_POSITION,
                  encoder_client});
           } else {
             RCLCPP_DEBUG(
-                logger,
+                node_->get_logger(),
                 "The model requires a position state interface at %s but "
                 "the driver does not provide it\n",
                 joint.name.c_str());
@@ -134,14 +131,14 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
         } else if (state_interface.name == hardware_interface::HW_IF_VELOCITY) {
           if (encoder_client->has_velocity()) {
             RCLCPP_DEBUG(
-                logger,
+                node_->get_logger(),
                 "RemoteSystemInterface: state_interface: has velocity\n");
             encoders_.insert(
                 {joint.name + "/" + hardware_interface::HW_IF_VELOCITY,
                  encoder_client});
           } else {
             RCLCPP_DEBUG(
-                logger,
+                node_->get_logger(),
                 "The model requires a velocity state interface at %s but "
                 "the driver does not provide it\n",
                 joint.name.c_str());
@@ -151,33 +148,39 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
     }
   }
 
-  RCLCPP_DEBUG(logger, "RemoteSystemInterface: %lu transmissions\n",
+  RCLCPP_DEBUG(node_->get_logger(),
+               "RemoteSystemInterface: %lu transmissions\n",
                info_.transmissions.size());
 #ifdef DEBUG
   for (const auto& transmission : info_.transmissions) {
-    RCLCPP_DEBUG(logger, "RemoteSystemInterface: transmission %s (%s)\n",
+    RCLCPP_DEBUG(node_->get_logger(),
+                 "RemoteSystemInterface: transmission %s (%s)\n",
                  transmission.name.c_str(), transmission.type.c_str());
     for (const auto& joint : transmission.joints) {
-      RCLCPP_DEBUG(logger,
+      RCLCPP_DEBUG(node_->get_logger(),
                    "RemoteSystemInterface: transmission joint %s (%s)\n",
                    joint.name.c_str(), joint.role.c_str());
-      RCLCPP_DEBUG(logger, "RemoteSystemInterface: mechanical_reduction %f\n",
+      RCLCPP_DEBUG(node_->get_logger(),
+                   "RemoteSystemInterface: mechanical_reduction %f\n",
                    joint.mechanical_reduction);
-      RCLCPP_DEBUG(logger, "RemoteSystemInterface: offset %f\n", joint.offset);
+      RCLCPP_DEBUG(node_->get_logger(), "RemoteSystemInterface: offset %f\n",
+                   joint.offset);
       for (const auto& interface : joint.interfaces) {
-        RCLCPP_DEBUG(logger, "RemoteSystemInterface: interface %s\n",
+        RCLCPP_DEBUG(node_->get_logger(),
+                     "RemoteSystemInterface: interface %s\n",
                      interface.c_str());
       }
     }
     for (const auto& actuator : transmission.actuators) {
-      RCLCPP_DEBUG(logger,
+      RCLCPP_DEBUG(node_->get_logger(),
                    "RemoteSystemInterface: transmission actuator %s (%s)\n",
                    actuator.name.c_str(), actuator.role.c_str());
     }
   }
 #endif
 
-  RCLCPP_DEBUG(logger, "RemoteSystemInterface configured successfully.\n");
+  RCLCPP_DEBUG(node_->get_logger(),
+               "RemoteSystemInterface configured successfully.\n");
   return CallbackReturn::SUCCESS;
 }
 

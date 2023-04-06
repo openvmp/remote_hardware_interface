@@ -28,9 +28,9 @@ Examples of such hardware modules include:
 
 #### Configuration
 
-Add the following to the URDF files:
+Here is an example of how it could look like in your URDF files:
 
-```
+```xml
   <ros2_control name="HardwareSystem" type="system">
     <hardware>
       <plugin>remote_hardware_interface/RemoteSystemInterface</plugin>
@@ -39,10 +39,10 @@ Add the following to the URDF files:
   </ros2_control>
 ```
 
-- namespace: the prefix to ROS2 interfaces
-
-  E.g. if the prefix is "/robot1" then the actuator of the "joint1" joint will
-  be exposed at "/robot1/actuator/joint1".
+- namespace: the prefix to all ROS2 interfaces
+  - there will be a node created in this namespace to facilitate messaging with actuators and encoders
+  - actuators will be expected to be at `<namespace>/actuator/<joint-name>`
+  - encoders will be expected to be at `<namespace>/encoder/<joint-name>`
 
 ### Implementation details
 
