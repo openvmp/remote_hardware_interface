@@ -4,7 +4,7 @@
     type="remote_hardware_interface::RemoteSystemInterface"
     base_class_type="hardware_interface::SystemInterface">
     <description>
-      remote_hardware_interface/RemoteSystemInterface
+      Hardware interface for remote or heavy hardware interface modules.
     </description>
   </class>
 </library>

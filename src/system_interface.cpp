@@ -17,13 +17,20 @@
 
 #ifndef DEBUG
 #undef RCLCPP_DEBUG
+#if 1
 #define RCLCPP_DEBUG(...)
+#else
+#define DEBUG
+#define RCLCPP_DEBUG RCLCPP_INFO
+#endif
 #endif
 
 namespace remote_hardware_interface {
 
 hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
     const hardware_interface::HardwareInfo& hardware_info) {
+  RCLCPP_DEBUG(node_->get_logger(), "RemoteSystemInterface: start");
+
   executor_ = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
   node_ = std::make_shared<rclcpp::Node>(
       "remote_hardware_interface",
@@ -36,7 +43,7 @@ hardware_interface::CallbackReturn RemoteSystemInterface::on_init(
   };
   thread_executor_spin_ = std::thread(spin);
 
-  RCLCPP_DEBUG(node_->get_logger(), "RemoteSystemInterface: start\n");
+  RCLCPP_DEBUG(node_->get_logger(), "RemoteSystemInterface: node started");
 
   if (SystemInterface::on_init(hardware_info) != CallbackReturn::SUCCESS) {
     return CallbackReturn::ERROR;

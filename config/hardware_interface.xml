@@ -1,9 +1,0 @@
-<library path="remote_hardware_interface">
-  <class name="remote_hardware_interface/SystemInterface"
-    type="remote_hardware_interface::SystemInterface"
-    base_class_type="hardware_interface::SystemInterface">
-    <description>
-      Hardware interface for remote or heavy hardware control nodes.
-    </description>
-  </class>
-</library>

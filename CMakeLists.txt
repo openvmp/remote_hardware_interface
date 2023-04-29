@@ -61,8 +61,19 @@ install(
   DESTINATION include/${PROJECT_NAME}
 )
 
+pluginlib_export_plugin_description_file(hardware_interface hardware_plugins.xml)
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_gmock REQUIRED)
+
+  ament_add_gmock(test_${PROJECT_NAME} test/test_system_interface.cpp)
+  # target_include_directories(test_${PROJECT_NAME} PRIVATE include)
+  # target_link_libraries(test_${PROJECT_NAME} hardware_interface)
+  ament_target_dependencies(test_${PROJECT_NAME}
+    pluginlib
+    hardware_interface
+  )
+
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files
@@ -74,6 +85,5 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-pluginlib_export_plugin_description_file(hardware_interface hardware_plugins.xml)
 
 ament_package()
