@@ -33,6 +33,8 @@ class RemoteSystemInterface final : public hardware_interface::SystemInterface {
  public:
   RCLCPP_SHARED_PTR_DEFINITIONS(RemoteSystemInterface)
 
+  virtual ~RemoteSystemInterface();
+
   hardware_interface::CallbackReturn on_init(
       const hardware_interface::HardwareInfo &info) override;
 
@@ -58,6 +60,20 @@ class RemoteSystemInterface final : public hardware_interface::SystemInterface {
   rclcpp::Node::SharedPtr node_;
   rclcpp::executors::MultiThreadedExecutor::SharedPtr executor_;
   std::thread thread_executor_spin_;
+  std::vector<std::thread> workers_;
+  volatile bool workers_do_stop_;
+
+  class Task {
+   public:
+    std::function<void()> func;
+    std::mutex mutex;
+    std::unique_lock<std::mutex> lock;
+    std::condition_variable cv;
+  };
+
+  std::list<std::shared_ptr<Task>> tasks_;
+  std::mutex tasks_mutex_;
+  std::condition_variable tasks_mutex_condition_;
   // // Parameters for the simulation
   // double hw_start_sec_;
   // double hw_stop_sec_;
@@ -71,6 +87,8 @@ class RemoteSystemInterface final : public hardware_interface::SystemInterface {
   std::vector<std::shared_ptr<EncoderClient>> client_encoders_;
   std::map<std::string, std::shared_ptr<remote_actuator::Interface>> actuators_;
   std::map<std::string, std::shared_ptr<remote_encoder::Interface>> encoders_;
+
+  void worker_loop_();
 };
 
 }  // namespace remote_hardware_interface
