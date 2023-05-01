@@ -1,11 +1,6 @@
-# OpenVMP
+# remote\_hardware\_interface
 
 [![License](./apache20.svg)](./LICENSE.txt)
-
-This package is a part of [the OpenVMP project](https://github.com/openvmp/openvmp).
-But it's designed to be universal and usable independently from the rest of OpenVMP or in a combination with select OpenVMP packages.
-
-## remote\_hardware\_interface
 
 This package implements a hardware interface plugin for ros2\_control
 and proxies requests to compatible nodes that actually implement the hardware
@@ -20,13 +15,16 @@ Examples of such hardware modules include:
 
 - Stepper motor drivers:
   - [Leadshine/STEPPERONLINE Modbus](https://github.com/openvmp/stepper_driver_em2rs/)
+  - PUL/DIR interfaces on [remote_microcontroller](https://github.com/openvmp/microcontroller/) (e.g. Arduino)
+- Servo drivers:
+  - PWM interfaces on [remote_microcontroller](https://github.com/openvmp/microcontroller/) (e.g. Arduino)
 - Absolute encoder drivers:
   - [CUI Devices AMT21](https://github.com/openvmp/encoder_amt21/)
 
 
-### How to
+## How to
 
-#### Configuration
+### Configuration
 
 Here is an example of how it could look like in your URDF files:
 
@@ -44,7 +42,7 @@ Here is an example of how it could look like in your URDF files:
   - actuators will be expected to be at `<namespace>/actuator/<joint-name>`
   - encoders will be expected to be at `<namespace>/encoder/<joint-name>`
 
-### Implementation details
+## Implementation details
 
 ```mermaid
 flowchart TB
